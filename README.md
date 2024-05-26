@@ -1,3 +1,15 @@
+This repository is HW part 02 of:
+
+https://courses.cs.washington.edu/courses/csep504/24sp/hw2.html
+
+by
+
+Ryder Roedel
+rdr9@cs.washington.edu
+
+Yuxing Yao
+yaoyx108@cs.washington.edu
+
 # This repository
 
 This repository contains a template for an abstract interpretation implementation

@@ -48,6 +48,11 @@ public class DivByZeroTransfer extends CFTransfer {
     MOD
   }
 
+  private AnnotationMirror TOP = reflect(Top.class);
+  private AnnotationMirror ZERO = reflect(Zero.class);
+  private AnnotationMirror NONZERO = reflect(Nonzero.class);
+  private AnnotationMirror BOTTOM = reflect(Bottom.class);
+
   // ========================================================================
   // Transfer functions to implement
 
@@ -76,7 +81,22 @@ public class DivByZeroTransfer extends CFTransfer {
    */
   private AnnotationMirror refineLhsOfComparison(
       Comparison operator, AnnotationMirror lhs, AnnotationMirror rhs) {
-    // TODO
+    if (!equal(rhs, ZERO)) {
+      // We only care about comparing to zero due to the simple lattice.
+      return glb(lhs, rhs);
+    }
+    switch (operator) {
+      case EQ:
+        return ZERO;
+      case NE:
+      case LT:
+      case GT:
+        return NONZERO;
+      case LE:
+      case GE:
+        // Do nothing
+        break;
+    }
     return lhs;
   }
 
@@ -97,7 +117,134 @@ public class DivByZeroTransfer extends CFTransfer {
    */
   private AnnotationMirror arithmeticTransfer(
       BinaryOperator operator, AnnotationMirror lhs, AnnotationMirror rhs) {
-    // TODO
+    switch (operator) {
+      case PLUS:
+        if (equal(lhs, NONZERO)) {
+          if (equal(rhs, NONZERO)) {
+            return NONZERO;
+          } else if (equal(rhs, ZERO)) {
+            return NONZERO;
+          } else if (equal(rhs, TOP)) {
+            return TOP;
+          } else if (equal(rhs, BOTTOM)) {
+            return BOTTOM;
+          } else {
+            throw new IllegalStateException();
+          }
+        } else if(equal(lhs, ZERO)) {
+          if (equal(rhs, NONZERO)) {
+            return NONZERO;
+          } else if (equal(rhs, ZERO)) {
+            return ZERO;
+          } else if (equal(rhs, TOP)) {
+            return TOP;
+          } else if (equal(rhs, BOTTOM)) {
+            return BOTTOM;
+          } else {
+            throw new IllegalStateException();
+          }
+        } else if(equal(lhs, TOP)) {
+          if (equal(rhs, NONZERO)) {
+            return TOP;
+          } else if (equal(rhs, ZERO)) {
+            return TOP;
+          } else if (equal(rhs, TOP)) {
+            return TOP;
+          } else if (equal(rhs, BOTTOM)) {
+            return BOTTOM;
+          } else {
+            throw new IllegalStateException();
+          }
+        } else if(equal(lhs, BOTTOM)) {
+          return BOTTOM;
+        } else {
+          throw new IllegalStateException();
+        }
+      case TIMES:
+        if (equal(lhs, NONZERO)) {
+          if (equal(rhs, NONZERO)) {
+            return NONZERO;
+          } else if (equal(rhs, ZERO)) {
+            return ZERO;
+          } else if (equal(rhs, TOP)) {
+            return TOP;
+          } else if (equal(rhs, BOTTOM)) {
+            return BOTTOM;
+          } else {
+            throw new IllegalStateException();
+          }
+        } else if(equal(lhs, ZERO)) {
+          if (equal(rhs, NONZERO)) {
+            return ZERO;
+          } else if (equal(rhs, ZERO)) {
+            return ZERO;
+          } else if (equal(rhs, TOP)) {
+            return ZERO;
+          } else if (equal(rhs, BOTTOM)) {
+            return BOTTOM;
+          } else {
+            throw new IllegalStateException();
+          }
+        } else if(equal(lhs, TOP)) {
+          if (equal(rhs, NONZERO)) {
+            return TOP;
+          } else if (equal(rhs, ZERO)) {
+            return ZERO;
+          } else if (equal(rhs, TOP)) {
+            return TOP;
+          } else if (equal(rhs, BOTTOM)) {
+            return BOTTOM;
+          } else {
+            throw new IllegalStateException();
+          }
+        } else if(equal(lhs, BOTTOM)) {
+          return BOTTOM;
+        } else {
+          throw new IllegalStateException();
+        }
+      case DIVIDE:
+        if (equal(lhs, NONZERO)) {
+          if (equal(rhs, NONZERO)) {
+            return TOP;
+          } else if (equal(rhs, ZERO)) {
+            return BOTTOM;
+          } else if (equal(rhs, TOP)) {
+            return BOTTOM;
+          } else if (equal(rhs, BOTTOM)) {
+            return BOTTOM;
+          } else {
+            throw new IllegalStateException();
+          }
+        } else if(equal(lhs, ZERO)) {
+          if (equal(rhs, NONZERO)) {
+            return ZERO;
+          } else if (equal(rhs, ZERO)) {
+            return BOTTOM;
+          } else if (equal(rhs, TOP)) {
+            return BOTTOM;
+          } else if (equal(rhs, BOTTOM)) {
+            return BOTTOM;
+          } else {
+            throw new IllegalStateException();
+          }
+        } else if(equal(lhs, TOP)) {
+          if (equal(rhs, NONZERO)) {
+            return TOP;
+          } else if (equal(rhs, ZERO)) {
+            return BOTTOM;
+          } else if (equal(rhs, TOP)) {
+            return BOTTOM;
+          } else if (equal(rhs, BOTTOM)) {
+            return BOTTOM;
+          } else {
+            throw new IllegalStateException();
+          }
+        } else if(equal(lhs, BOTTOM)) {
+          return BOTTOM;
+        } else {
+          throw new IllegalStateException();
+        }
+    }
     return top();
   }
 
